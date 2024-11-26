@@ -134,7 +134,7 @@ const Home = () => {
         data: { label: node.label },
         position: generatePosition(400, index),
         draggable: false,
-        sourcePosition: 'right' as Position,
+        sourcePosition: 'left' as Position,
         targetPosition: 'left' as Position,
       }))
 
@@ -192,9 +192,11 @@ const Home = () => {
 
     if (!sourceNode || !targetNode) return false
 
+    // Разрешены соединения от connection -> transform
     if (
       sourceNode.id.startsWith('connection') &&
-      targetNode.id.startsWith('transform')
+      (targetNode.id.startsWith('transform') ||
+        targetNode.id === 'static-section')
     ) {
       return true
     }
@@ -209,6 +211,7 @@ const Home = () => {
     if (!sourceNode || !targetNode) return
 
     if (targetNode.id === 'static-section') {
+      // Если подключаемся к секции, удаляем все соединения этого connection к конкретным transform-нодам
       setEdges((eds) =>
         eds.filter(
           (edge) =>
@@ -219,6 +222,7 @@ const Home = () => {
     }
 
     if (targetNode.id.startsWith('transform')) {
+      // Если подключаемся к конкретной transform-ноде, удаляем соединение к секции
       setEdges((eds) =>
         eds.filter(
           (edge) =>
@@ -231,10 +235,10 @@ const Home = () => {
   const onConnect = useCallback(
     (connection: Connection) => {
       if (validateConnection(connection)) {
-        handleSectionConnections(connection)
+        handleSectionConnections(connection) // Управляем конфликтами соединений
         setEdges((eds) => addEdge(connection, eds))
       } else {
-        alert('Друг, ну так нельзя, очевидно!')
+        alert('Недопустимое соединение!')
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -269,7 +273,6 @@ const Home = () => {
 
     setNodes((nds) => [...nds, newNode])
     closeModal()
-    console.log(nodes)
   }
 
   const onReconnectStart = useCallback(() => {
@@ -288,7 +291,9 @@ const Home = () => {
   const onReconnectEnd = useCallback(
     (_: MouseEvent | TouchEvent, edge: Edge) => {
       if (!edgeReconnectSuccessful.current) {
-        setEdges((eds) => eds.filter((e) => e.id !== edge.id))
+        if (edge.id.includes('connection')) {
+          setEdges((eds) => eds.filter((e) => e.id !== edge.id))
+        }
       }
 
       edgeReconnectSuccessful.current = true
