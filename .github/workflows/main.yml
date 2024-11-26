@@ -1,0 +1,37 @@
+name: Build and Deploy to Dev
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 checkout
+        uses: actions/checkout@v4
+
+      - name: Set Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: Run install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install # will run `yarn install` command
+
+      - name: 🛠build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+
+      - name: 🚀deploy
+        uses: burnett01/rsync-deployments@7.0.0
+        with:
+          switches: -apruz --delete
+          path: ./dist/
+          remote_path: ${{ vars.HACK_FOLDER }}
+          remote_host: ${{ secrets.HACK_HOST }}
+          remote_user: ${{ vars.HACK_USER }}
+          remote_key: ${{ secrets.HACK_SSH_KEY }}

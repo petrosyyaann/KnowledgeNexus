@@ -1,0 +1,49 @@
+@font-face {
+  font-family: 'EuclidFlex';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('./EuclidFlexBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'EuclidFlex';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./EuclidFlexLight.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'EuclidFlex';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./EuclidFlexMedium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'EuclidFlex';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./EuclidFlexRegular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'EuclidFlex';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('./EuclidFlexSemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'EuclidFlex';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./EuclidFlexThin.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'EuclidFlex';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('./EuclidFlexUltraLight.ttf') format('truetype');
+}
