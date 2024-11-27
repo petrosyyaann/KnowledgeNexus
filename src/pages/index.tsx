@@ -5,7 +5,8 @@ import { LoginLogo } from 'shared/iconpack'
 import { DefaultLayout, Flex, LoginLayout, Text } from 'shared/ui'
 import { Menu } from 'widgets/Menu'
 
-const HomePage = lazy(() => import('./home'))
+const SchemePage = lazy(() => import('./scheme'))
+const KnowledgeBasePage = lazy(() => import('./knowledge-base'))
 const LoginPage = lazy(() => import('./login'))
 const RegistrationPage = lazy(() => import('./registration'))
 
@@ -35,10 +36,18 @@ export default function Routing() {
         )}
         <Routes>
           <Route
-            path={'/home'}
+            path={'/knowledge-base'}
             element={
               <ProtectedRoute>
-                <HomePage />
+                <KnowledgeBasePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={'/scheme'}
+            element={
+              <ProtectedRoute>
+                <SchemePage />
               </ProtectedRoute>
             }
           />

@@ -8,7 +8,7 @@ import { Aside } from 'shared/ui/aside'
 function Menu() {
   const isLogin = useMatch('/')
   const isRegistration = useMatch('/registration')
-  const isKnowledgeBase = useMatch('/home')
+  const isKnowledgeBase = useMatch('/knowledge-base')
   const navigate = useNavigate()
   const toast = useToast()
   if (isLogin || isRegistration) return null
@@ -19,7 +19,7 @@ function Menu() {
           title={'Базы знаний'}
           Icon={Tasks}
           check={!!isKnowledgeBase}
-          onClick={() => navigate('/home')}
+          onClick={() => navigate('/knowledge-base')}
         />
         <ButtonsNavigations
           title={'Выход'}
