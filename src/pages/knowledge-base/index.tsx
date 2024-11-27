@@ -101,7 +101,8 @@ const KnowledgeBase = () => {
           <Button
             size="sm"
             colorScheme="blue"
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation()
               setSelectedBase(info.row.original)
               onWidgetModalOpen()
             }}
@@ -111,7 +112,8 @@ const KnowledgeBase = () => {
           <Button
             size="sm"
             colorScheme="purple"
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation()
               setSelectedBase(info.row.original)
               onHostModalOpen()
             }}
