@@ -11,7 +11,7 @@ export const CombinedProviders = ({ children }: CombinedProvidersProps) => {
   return (
     <ReactStrictModeProvider>
       <CustomChakraProvider>
-          <RouterProvider>{children}</RouterProvider>
+        <RouterProvider>{children}</RouterProvider>
       </CustomChakraProvider>
     </ReactStrictModeProvider>
   )

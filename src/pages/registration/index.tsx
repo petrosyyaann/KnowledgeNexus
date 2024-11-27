@@ -1,12 +1,12 @@
-import { Center } from "shared/ui"
-import { RegistrationForm } from "widgets/RegistrForm/ui"
+import { Center } from 'shared/ui'
+import { RegistrationForm } from 'widgets/RegistrForm/ui'
 
 const RegistrationPage = () => {
   return (
     <Center>
-      <RegistrationForm/>
+      <RegistrationForm />
     </Center>
-)
+  )
 }
 
 export default RegistrationPage

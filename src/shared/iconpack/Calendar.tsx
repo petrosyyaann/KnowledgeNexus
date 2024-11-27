@@ -4,7 +4,10 @@ interface CalendarProps extends SVGProps<SVGSVGElement> {
   strokeColor?: string
 }
 
-export const Calendar = ({ strokeColor = '#161F29', ...props }: CalendarProps) => (
+export const Calendar = ({
+  strokeColor = '#161F29',
+  ...props
+}: CalendarProps) => (
   <svg
     width="15"
     height="16"
@@ -21,4 +24,3 @@ export const Calendar = ({ strokeColor = '#161F29', ...props }: CalendarProps) =
     />
   </svg>
 )
-

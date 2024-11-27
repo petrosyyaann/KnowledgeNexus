@@ -4,10 +4,7 @@ interface ChevronProps extends SVGProps<SVGSVGElement> {
   strokeColor?: string
 }
 
-export const Chevron = ({
-  strokeColor = '#161F29',
-  ...props
-}: ChevronProps) => (
+export const Chevron = ({ ...props }: ChevronProps) => (
   <svg
     width="16"
     height="26"

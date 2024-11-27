@@ -1,10 +1,6 @@
 import { extendTheme } from '@chakra-ui/react'
 import 'shared/config/fonts/fonts.css'
-import {
-  ButtonTheme,
-  InputTheme,
-  TextTheme,
-} from 'shared/ui'
+import { ButtonTheme, InputTheme, TextTheme } from 'shared/ui'
 
 export const theme = extendTheme({
   components: {

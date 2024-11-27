@@ -31,7 +31,7 @@ export async function refreshWithoutRepeats() {
     }
     return response
   } finally {
-    refreshPromise = null 
+    refreshPromise = null
   }
 }
 
@@ -40,7 +40,7 @@ const $api = axios.create({ withCredentials: true, responseType: 'json' })
 /* ==$API with  response interceptors== */
 
 $api.interceptors.response.use(
-  (response) => response, 
+  (response) => response,
   async (error) => {
     const originalRequest = error.config
 
@@ -52,8 +52,8 @@ $api.interceptors.response.use(
       originalRequest._isRetry = true
 
       try {
-        await refreshWithoutRepeats() 
-        return $api.request(originalRequest) 
+        await refreshWithoutRepeats()
+        return $api.request(originalRequest)
       } catch (refreshError) {
         localStorage.removeItem('refresh')
         throw refreshError

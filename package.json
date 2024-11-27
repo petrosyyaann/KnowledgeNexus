@@ -9,7 +9,7 @@
     "lint": "yarn lint:type && yarn lint:eslint && yarn lint:prettier",
     "preview": "vite preview",
     "lint:type": "tsc --noEmit",
-    "lint:eslint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "lint:eslint": "eslint . --max-warnings=0",
     "lint:prettier": "prettier --check .",
     "prettier": "prettier --write ."
   },
