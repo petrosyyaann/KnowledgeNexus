@@ -14,73 +14,9 @@ import {
   CoordinateExtent,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import {
-  Flex,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Select,
-} from '@chakra-ui/react'
-import { Button } from 'shared/ui'
-
-interface BackendNode {
-  id: string
-  type: 'connection' | 'transform' | 'rag'
-  label: string
-  connections: string[]
-}
-
-const backendData: BackendNode[] = [
-  {
-    id: 'connection-1',
-    type: 'connection',
-    label: 'confluence',
-    connections: ['transform-1'],
-  },
-  {
-    id: 'connection-2',
-    type: 'connection',
-    label: 'url',
-    connections: ['transform-2'],
-  },
-  {
-    id: 'transform-1',
-    type: 'transform',
-    label: 'pdf parser',
-    connections: [],
-  },
-  { id: 'transform-2', type: 'transform', label: 'ocr', connections: [] },
-  { id: 'transform-3', type: 'transform', label: 'ASR', connections: [] },
-  {
-    id: 'transform-4',
-    type: 'transform',
-    label: 'txt_parser',
-    connections: [],
-  },
-  { id: 'transform-5', type: 'transform', label: 'clip', connections: [] },
-  { id: 'transform-6', type: 'transform', label: 'clap', connections: [] },
-  {
-    id: 'rag-1',
-    type: 'rag',
-    label: 'chunker1',
-    connections: [],
-  },
-  {
-    id: 'rag-2',
-    type: 'rag',
-    label: 'embedder',
-    connections: [],
-  },
-  {
-    id: 'rag-3',
-    type: 'rag',
-    label: 'llm qa',
-    connections: [],
-  },
-]
+import { Button, Flex } from 'shared/ui'
+import { AddNodeModal } from './modal'
+import { backendData } from './const'
 
 const generatePosition = (x: number, yIndex: number) => ({
   x,
@@ -96,6 +32,9 @@ const Home = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalType, setModalType] = useState<'connection' | 'transform'>(
+    'connection'
+  )
   const [selectedLabel, setSelectedLabel] = useState('')
   const edgeReconnectSuccessful = useRef(true)
 
@@ -245,7 +184,8 @@ const Home = () => {
     [nodes, setEdges]
   )
 
-  const openModal = () => {
+  const openModal = (type: 'connection' | 'transform') => {
+    setModalType(type)
     setIsModalOpen(true)
   }
 
@@ -254,25 +194,61 @@ const Home = () => {
     setSelectedLabel('')
   }
 
-  const addNewConnection = () => {
+  const addNewNode = () => {
     if (!selectedLabel) {
       alert('Please select a label!')
       return
     }
 
-    const newId = `connection-${nodes.length + 1}`
-    const newNode: Node = {
-      id: newId,
-      type: 'default',
-      data: { label: selectedLabel },
-      position: generatePosition(100, nodes.length - 11),
-      draggable: false,
-      sourcePosition: 'right' as Position,
-      targetPosition: 'right' as Position,
-    }
+    if (modalType === 'connection') {
+      const newId = `connection-${nodes.length + 1}`
+      const newNode: Node = {
+        id: newId,
+        type: 'default',
+        data: { label: selectedLabel },
+        position: generatePosition(
+          100,
+          nodes.filter((n) => n.id.startsWith('connection')).length
+        ),
+        draggable: false,
+        sourcePosition: 'right' as Position,
+        targetPosition: 'right' as Position,
+      }
+      setNodes((nds) => [...nds, newNode])
+    } else if (modalType === 'transform') {
+      const newId = `transform-${nodes.length + 1}`
+      const newNode: Node = {
+        id: newId,
+        type: 'default',
+        data: { label: selectedLabel },
+        position: generatePosition(
+          400,
+          nodes.filter((n) => n.id.startsWith('transform')).length
+        ),
+        draggable: false,
+        sourcePosition: 'left' as Position,
+        targetPosition: 'left' as Position,
+      }
+      setNodes((nds) => [...nds, newNode])
 
-    setNodes((nds) => [...nds, newNode])
-    closeModal()
+      // Adjust the size of the static section dynamically
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === 'static-section'
+            ? {
+                ...node,
+                style: {
+                  ...node.style,
+                  height:
+                    100 +
+                    nodes.filter((n) => n.id.startsWith('transform')).length *
+                      80,
+                },
+              }
+            : node
+        )
+      )
+    }
   }
 
   const onReconnectStart = useCallback(() => {
@@ -314,32 +290,23 @@ const Home = () => {
 
   return (
     <Flex direction="column" alignItems="flex-end" p="15px" gap="5px">
-      <Button onClick={openModal}>Добавить сonnection</Button>
-      <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Выбрать Connection</ModalHeader>
-          <ModalBody>
-            <Select
-              placeholder="Выбрать тип"
-              onChange={(e) => setSelectedLabel(e.target.value)}
-            >
-              <option value="confluence">Confluence</option>
-              <option value="file upload s3">File Upload S3</option>
-              <option value="notion">Notion</option>
-              <option value="url">URL</option>
-              <option value="db">Database</option>
-            </Select>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={addNewConnection} mr={3}>
-              Добавить
-            </Button>
-            <Button onClick={closeModal}>Отмена</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Flex w="95vw" h="80vh">
+      <Flex gap="20px">
+        <Button onClick={() => openModal('connection')}>
+          Добавить connection
+        </Button>
+        <Button onClick={() => openModal('transform')}>
+          Добавить transform
+        </Button>
+      </Flex>
+      <AddNodeModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        modalType={modalType}
+        selectedLabel={selectedLabel}
+        setSelectedLabel={setSelectedLabel}
+        onAdd={addNewNode}
+      />
+      <Flex w="90vw" h="80vh">
         <ReactFlow
           nodes={nodes}
           edges={edges}

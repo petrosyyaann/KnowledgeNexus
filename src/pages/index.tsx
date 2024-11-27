@@ -3,6 +3,7 @@ import { lazy } from 'react'
 import { Route, Routes, useMatch } from 'react-router-dom'
 import { LoginLogo } from 'shared/iconpack'
 import { DefaultLayout, Flex, LoginLayout, Text } from 'shared/ui'
+import { Menu } from 'widgets/Menu'
 
 const HomePage = lazy(() => import('./home'))
 const LoginPage = lazy(() => import('./login'))
@@ -27,6 +28,11 @@ export default function Routing() {
         </Flex>
       )}
       <Flex w="100vw" h="100%">
+        {!(isRegistration || isLogin) && refresh && (
+          <Flex h="100%" w="85px">
+            <Menu />
+          </Flex>
+        )}
         <Routes>
           <Route
             path={'/home'}
