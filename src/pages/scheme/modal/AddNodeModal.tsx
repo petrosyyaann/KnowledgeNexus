@@ -51,7 +51,7 @@ export const AddNodeModal: React.FC<AddNodeModalProps> = ({
               <>
                 <option value="pdf_parser">PDF Parser</option>
                 <option value="ocr">OCR</option>
-                <option value="ASR">ASR</option>
+                <option value="asr">asr</option>
                 <option value="txt_parser">Text Parser</option>
                 <option value="clip">CLIP</option>
                 <option value="clap">CLAP</option>

@@ -11,25 +11,28 @@ import {
   Connection,
   Position,
   reconnectEdge,
-  CoordinateExtent,
   NodeChange,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Button, Flex } from 'shared/ui'
-import { AddNodeModal } from './modal'
-import { backendData } from './const'
+import { AddNodeModal } from './modal/AddNodeModal'
+import { defaultData, BackendNode, startData } from './types'
+import NodeModal from './modal/NodeModal'
+import { transformBackendDataToFlow } from './lib/transformBackendDataToFlow'
+import { postWorkflow } from 'entities/workflow/api'
+import { useToast } from '@chakra-ui/react'
+import {
+  transformFlowToBackendData,
+  filterNodes,
+} from './lib/transformFlowToBackendData'
 
 const generatePosition = (x: number, yIndex: number) => ({
   x,
   y: 100 + yIndex * 80,
 })
 
-const generatePositionGroup = (x: number, yIndex: number) => ({
-  x: x + yIndex * 80 + 25,
-  y: 300,
-})
-
 const Home = () => {
+  const toast = useToast()
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -38,97 +41,36 @@ const Home = () => {
   )
   const [selectedLabel, setSelectedLabel] = useState('')
   const edgeReconnectSuccessful = useRef(true)
+  const [selectedNode, setSelectedNode] = useState<BackendNode | null>(null)
+  const [isEditModalOpen, setEditModalOpen] = useState(false)
 
-  useEffect(() => {
-    const newNodes: Node[] = []
+  const openEditModal = (node: BackendNode) => {
+    setSelectedNode(node)
+    setEditModalOpen(true)
+  }
 
-    // Addable Nodes
-    const addableNodes = backendData
-      .filter((node) => node.type === 'connection')
-      .map((node, index) => ({
-        id: node.id,
-        type: 'default',
-        data: { label: node.label },
-        position: generatePosition(100, index),
-        draggable: false,
-        sourcePosition: 'right' as Position,
-        targetPosition: 'right' as Position,
-        style: { cursor: 'pointer' },
-      }))
+  const closeEditModal = () => {
+    setEditModalOpen(false)
+    setSelectedNode(null)
+  }
 
-    // static Section
-    const staticSection: Node = {
-      id: 'static-section',
-      draggable: false,
-      data: { label: 'transform' },
-      position: { x: 375, y: 50 },
-      sourcePosition: 'right' as Position,
-      targetPosition: 'top' as Position,
-      style: { width: 200, height: 550, background: 'transparent' },
-    }
-
-    // Static Nodes
-    const staticNodes = backendData
-      .filter((node) => node.type === 'transform')
-      .map((node, index) => ({
-        id: node.id,
-        type: 'default',
-        data: { label: node.label },
-        position: generatePosition(400, index),
-        draggable: false,
-        sourcePosition: 'left' as Position,
-        targetPosition: 'left' as Position,
-        style: { cursor: 'pointer' },
-      }))
-
-    // Grouped Section (creating one group containing 3 nodes)
-    const groupedSection: Node = {
-      id: 'RAG-section',
-      draggable: false,
-      data: { label: 'RAG' },
-      position: { x: 700, y: 200 },
-      sourcePosition: 'left' as Position,
-      targetPosition: 'left' as Position,
-      style: { width: 600, height: 250, background: 'transparent' },
-    }
-
-    const groupedNodes = backendData
-      .filter((node) => node.type === 'rag')
-      .map((node, index) => ({
-        id: node.id,
-        type: 'default',
-        extent: 'parent' as 'parent' | CoordinateExtent,
-        data: { label: node.label },
-        position: generatePositionGroup(700 + index * 120, index),
-        draggable: false,
-        sourcePosition:
-          node.id === 'RAG-3' ? ('left' as Position) : ('right' as Position),
-        targetPosition:
-          node.id === 'RAG-1' ? ('right' as Position) : ('left' as Position),
-        style: { cursor: 'pointer' },
-      }))
-
-    newNodes.push(
-      groupedSection,
-      staticSection,
-      ...addableNodes,
-      ...staticNodes,
-      ...groupedNodes
+  const handleNodeSave = (updatedNode: BackendNode) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === updatedNode.id
+          ? {
+              ...updatedNode,
+              data: { ...updatedNode.data, label: updatedNode.label },
+              position: node.position,
+            }
+          : node
+      )
     )
-
-    // Internal connections in RAG section
-    const groupedInternalEdges = [
-      {
-        id: 'e-static-section-RAG-section',
-        source: 'static-section',
-        target: 'RAG-section',
-      },
-      { id: 'e-RAG-1-RAG-2', source: 'RAG-1', target: 'RAG-2' },
-      { id: 'e-RAG-2-RAG-3', source: 'RAG-2', target: 'RAG-3' },
-    ]
-
-    setNodes(newNodes)
-    setEdges([...groupedInternalEdges])
+  }
+  useEffect(() => {
+    const { nodes, edges } = transformBackendDataToFlow(startData)
+    setNodes(nodes)
+    setEdges([...edges])
   }, [setNodes, setEdges])
 
   const validateConnection = (connection: Connection): boolean => {
@@ -183,7 +125,15 @@ const Home = () => {
         handleSectionConnections(connection) // Управляем конфликтами соединений
         setEdges((eds) => addEdge(connection, eds))
       } else {
-        alert('Недопустимое соединение!')
+        toast({
+          position: 'bottom-right',
+          title: 'Ошибка',
+          description: 'Недопустимое соединение!',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+          variant: 'top-accent',
+        })
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,16 +152,29 @@ const Home = () => {
 
   const addNewNode = () => {
     if (!selectedLabel) {
-      alert('Please select a label!')
+      toast({
+        position: 'bottom-right',
+        title: 'Ошибка',
+        description: 'Заполните все поля!',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+        variant: 'top-accent',
+      })
       return
     }
 
     if (modalType === 'connection') {
       const newId = `connection-${nodes.length + 1}`
-      const newNode: Node = {
+      const newNode = {
         id: newId,
         type: 'default',
-        data: { label: selectedLabel },
+        label: selectedLabel,
+        data: {
+          label: selectedLabel,
+          ...defaultData.filter((value) => value.label === selectedLabel)[0]
+            .data,
+        },
         position: generatePosition(
           100,
           nodes.filter((n) => n.id.startsWith('connection')).length
@@ -226,7 +189,11 @@ const Home = () => {
       const newNode: Node = {
         id: newId,
         type: 'default',
-        data: { label: selectedLabel },
+        data: {
+          label: selectedLabel,
+          ...defaultData.filter((value) => value.label === selectedLabel)[0]
+            .data,
+        },
         position: generatePosition(
           400,
           nodes.filter((n) => n.id.startsWith('transform')).length
@@ -287,7 +254,15 @@ const Home = () => {
   function shouldNodeBeRemoved(node: Node | undefined) {
     if (!node) return false // Если узел не найден, предотвращаем удаление
     if (node.id.includes('section') || node.id.includes('RAG')) {
-      alert('Удаление узлов section или RAG запрещено!')
+      toast({
+        position: 'bottom-right',
+        title: 'Ошибка',
+        description: 'Удаление узлов section или RAG запрещено!',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+        variant: 'top-accent',
+      })
       return false
     }
     return true
@@ -315,16 +290,48 @@ const Home = () => {
       // Применяем отфильтрованные изменения
       onNodesChange(nextChanges)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodes, onNodesChange]
   )
 
   const saveConnections = () => {
-    const updatedBackendData = backendData.map((node) => ({
-      ...node,
-      connections: edges
-        .filter((edge) => edge.source === node.id)
-        .map((edge) => edge.target),
-    }))
+    const updatedBackendData = filterNodes(
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      transformFlowToBackendData(nodes).map((node) => ({
+        ...node,
+        connections: edges
+          .filter((edge) => edge.source === node.id)
+          .map((edge) => edge.target),
+      }))
+    )
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    postWorkflow(updatedBackendData)
+      .then(() => {
+        toast({
+          position: 'bottom-right',
+          title: 'Успешно!',
+          description: `Загрузка успешна`,
+          status: 'success',
+          duration: 9000,
+          isClosable: true,
+          variant: 'top-accent',
+        })
+      })
+      .catch((error) => {
+        console.log(error)
+        toast({
+          position: 'bottom-right',
+          title: 'Ошибка',
+          description: error && error.response.statusText,
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+          variant: 'top-accent',
+        })
+      })
     console.log('Saving connections:', updatedBackendData)
   }
 
@@ -346,6 +353,14 @@ const Home = () => {
         setSelectedLabel={setSelectedLabel}
         onAdd={addNewNode}
       />
+      {selectedNode && (
+        <NodeModal
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+          node={selectedNode!}
+          onSave={(data) => handleNodeSave(data)}
+        />
+      )}
       <Flex w="90vw" h="80vh">
         <ReactFlow
           nodes={nodes}
@@ -354,7 +369,10 @@ const Home = () => {
           onNodesChange={handleNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={(_, node) => {
-            console.log('Нода кликнута:', node)
+            const backendNode = nodes.find((n) => n.id === node.id)
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            if (backendNode) openEditModal(backendNode)
           }}
           nodesDraggable={false}
           elementsSelectable={true}
@@ -367,7 +385,7 @@ const Home = () => {
           <Background />
         </ReactFlow>
       </Flex>
-      <Button onClick={saveConnections}>Обработать</Button>
+      <Button onClick={saveConnections}>Сохранить и обработать</Button>
     </Flex>
   )
 }

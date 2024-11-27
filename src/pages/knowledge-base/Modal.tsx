@@ -10,6 +10,7 @@ import {
   ModalOverlay,
   Code,
   Box,
+  useToast,
 } from '@chakra-ui/react'
 import { Button, Input, Textarea, Text } from 'shared/ui'
 
@@ -21,6 +22,7 @@ export const CustomModal = ({
   onClose: () => void
 }) => {
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const toast = useToast()
 
   // Состояния для полей ввода
   const [title, setTitle] = useState('Мой чат')
@@ -85,7 +87,15 @@ export const CustomModal = ({
 
   const handleCopy = async () => {
     if (!validate()) {
-      alert('Пожалуйста, исправьте ошибки перед копированием')
+      toast({
+        position: 'bottom-right',
+        title: 'Ошибка',
+        description: 'Пожалуйста, исправьте ошибки перед копированием',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+        variant: 'top-accent',
+      })
       return
     }
     navigator.clipboard.writeText(generateCode())
