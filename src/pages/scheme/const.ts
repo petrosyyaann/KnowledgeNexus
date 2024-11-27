@@ -35,19 +35,19 @@ export const backendData: BackendNode[] = [
   { id: 'transform-5', type: 'transform', label: 'clip', connections: [] },
   { id: 'transform-6', type: 'transform', label: 'clap', connections: [] },
   {
-    id: 'rag-1',
+    id: 'RAG-1',
     type: 'rag',
     label: 'chunker1',
     connections: [],
   },
   {
-    id: 'rag-2',
+    id: 'RAG-2',
     type: 'rag',
     label: 'embedder',
     connections: [],
   },
   {
-    id: 'rag-3',
+    id: 'RAG-3',
     type: 'rag',
     label: 'llm qa',
     connections: [],

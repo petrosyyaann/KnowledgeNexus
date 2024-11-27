@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Widget Test</title>
+</head>
+<body>
+    <!-- Include the chat widget script -->
+    <script src="chat-widget.js"></script>
+
+    <!-- Initialize the chat widget -->
+    <script>
+        window.addEventListener('load', function() {
+            createChatWidget({
+                apiUrl: 'http://localhost:3000/messages',
+                title: 'My Custom Chat',
+                themeColor: '#17a2b8',
+                customCss: `
+                    .chat-widget-container {
+                        font-size: 14px;
+                    }
+                    .chat-widget-header {
+                        font-weight: bold;
+                    }
+                `,
+                iconUrl: 'https://your-domain.com/path/to/icon.png'
+            });
+        });
+    </script>
+</body>
+</html>

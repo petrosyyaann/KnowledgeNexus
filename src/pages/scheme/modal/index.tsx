@@ -1,4 +1,12 @@
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select } from '@chakra-ui/react'
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Select,
+} from '@chakra-ui/react'
 import { Button } from 'shared/ui'
 
 interface AddNodeModalProps {
@@ -22,7 +30,9 @@ export const AddNodeModal: React.FC<AddNodeModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Выбрать {modalType === 'connection' ? 'Connection' : 'Transform'}</ModalHeader>
+        <ModalHeader>
+          Выбрать {modalType === 'connection' ? 'Connection' : 'Transform'}
+        </ModalHeader>
         <ModalBody>
           <Select
             placeholder="Выбрать тип"
@@ -32,14 +42,14 @@ export const AddNodeModal: React.FC<AddNodeModalProps> = ({
             {modalType === 'connection' ? (
               <>
                 <option value="confluence">Confluence</option>
-                <option value="file upload s3">File Upload S3</option>
+                <option value="file_upload_s3">File Upload S3</option>
                 <option value="notion">Notion</option>
                 <option value="url">URL</option>
                 <option value="db">Database</option>
               </>
             ) : (
               <>
-                <option value="pdf parser">PDF Parser</option>
+                <option value="pdf_parser">PDF Parser</option>
                 <option value="ocr">OCR</option>
                 <option value="ASR">ASR</option>
                 <option value="txt_parser">Text Parser</option>
@@ -50,7 +60,13 @@ export const AddNodeModal: React.FC<AddNodeModalProps> = ({
           </Select>
         </ModalBody>
         <ModalFooter>
-          <Button onClick={onAdd} mr={3}>
+          <Button
+            onClick={() => {
+              onAdd()
+              onClose()
+            }}
+            mr={3}
+          >
             Добавить
           </Button>
           <Button onClick={onClose}>Отмена</Button>

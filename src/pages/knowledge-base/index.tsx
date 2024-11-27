@@ -1,11 +1,5 @@
 import { useState } from 'react'
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Table,
   Tbody,
   Td,
@@ -19,8 +13,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Box, Button, Input, Textarea } from 'shared/ui'
+import { Box, Button } from 'shared/ui'
 import { useNavigate } from 'react-router-dom'
+import { CustomModal } from './Modal'
 
 // Тип данных для строки
 type KnowledgeBaseRow = {
@@ -47,24 +42,7 @@ const KnowledgeBase = () => {
   const navigate = useNavigate()
 
   // Управление модалками
-  const {
-    isOpen: isWidgetModalOpen,
-    onOpen: onWidgetModalOpen,
-    onClose: onWidgetModalClose,
-  } = useDisclosure()
-
-  const {
-    isOpen: isHostModalOpen,
-    onOpen: onHostModalOpen,
-    onClose: onHostModalClose,
-  } = useDisclosure()
-
-  const { isOpen: isStyleModalOpen, onClose: onStyleModalClose } =
-    useDisclosure()
-
-  const [selectedBase, setSelectedBase] = useState<KnowledgeBaseRow | null>(
-    null
-  )
+  const { isOpen, onClose, onOpen } = useDisclosure()
 
   // Удаление базы знаний
   const deleteBase = (name: string) => {
@@ -103,22 +81,10 @@ const KnowledgeBase = () => {
             colorScheme="blue"
             onClick={(event) => {
               event.stopPropagation()
-              setSelectedBase(info.row.original)
-              onWidgetModalOpen()
+              onOpen()
             }}
           >
             Настройка чата
-          </Button>
-          <Button
-            size="sm"
-            colorScheme="purple"
-            onClick={(event) => {
-              event.stopPropagation()
-              setSelectedBase(info.row.original)
-              onHostModalOpen()
-            }}
-          >
-            Ограничение на хосты
           </Button>
           <Button
             size="sm"
@@ -169,50 +135,7 @@ const KnowledgeBase = () => {
         </Tbody>
       </Table>
 
-      {/* Модалка для настройки виджета */}
-      <Modal isOpen={isWidgetModalOpen} onClose={onWidgetModalClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Код для виджета чата</ModalHeader>
-          <ModalBody>
-            <Textarea
-              isReadOnly
-              value={`<script src="https://example.com/chat-widget.js" data-base="${selectedBase?.name}"></script>`}
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onWidgetModalClose}>Закрыть</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Модалка для ограничения хостов */}
-      <Modal isOpen={isHostModalOpen} onClose={onHostModalClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Ограничение на хосты</ModalHeader>
-          <ModalBody>
-            <Input placeholder="example.com, 192.168.1.1" />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onHostModalClose}>Сохранить</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Модалка для настройки стилей */}
-      <Modal isOpen={isStyleModalOpen} onClose={onStyleModalClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Настройка стилей чата</ModalHeader>
-          <ModalBody>
-            <Textarea placeholder="Введите CSS стили" />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onStyleModalClose}>Сохранить</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <CustomModal isOpen={isOpen} onClose={onClose} />
     </Box>
   )
 }

@@ -13,9 +13,6 @@ import {
   reconnectEdge,
   CoordinateExtent,
   NodeChange,
-  // getConnectedEdges,
-  // getIncomers,
-  // getOutgoers,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Button, Flex } from 'shared/ui'
@@ -86,7 +83,7 @@ const Home = () => {
 
     // Grouped Section (creating one group containing 3 nodes)
     const groupedSection: Node = {
-      id: 'rag-section',
+      id: 'RAG-section',
       draggable: false,
       data: { label: 'RAG' },
       position: { x: 700, y: 200 },
@@ -105,9 +102,9 @@ const Home = () => {
         position: generatePositionGroup(700 + index * 120, index),
         draggable: false,
         sourcePosition:
-          node.id === 'rag-3' ? ('left' as Position) : ('right' as Position),
+          node.id === 'RAG-3' ? ('left' as Position) : ('right' as Position),
         targetPosition:
-          node.id === 'rag-1' ? ('right' as Position) : ('left' as Position),
+          node.id === 'RAG-1' ? ('right' as Position) : ('left' as Position),
         style: { cursor: 'pointer' },
       }))
 
@@ -119,15 +116,15 @@ const Home = () => {
       ...groupedNodes
     )
 
-    // Internal connections in rag section
+    // Internal connections in RAG section
     const groupedInternalEdges = [
       {
-        id: 'e-static-section-rag-section',
+        id: 'e-static-section-RAG-section',
         source: 'static-section',
-        target: 'rag-section',
+        target: 'RAG-section',
       },
-      { id: 'e-rag-1-rag-2', source: 'rag-1', target: 'rag-2' },
-      { id: 'e-rag-2-rag-3', source: 'rag-2', target: 'rag-3' },
+      { id: 'e-RAG-1-RAG-2', source: 'RAG-1', target: 'RAG-2' },
+      { id: 'e-RAG-2-RAG-3', source: 'RAG-2', target: 'RAG-3' },
     ]
 
     setNodes(newNodes)
@@ -289,8 +286,8 @@ const Home = () => {
 
   function shouldNodeBeRemoved(node: Node | undefined) {
     if (!node) return false // Если узел не найден, предотвращаем удаление
-    if (node.id.includes('section') || node.id.includes('rag')) {
-      alert('Удаление узлов section или rag запрещено!')
+    if (node.id.includes('section') || node.id.includes('RAG')) {
+      alert('Удаление узлов section или RAG запрещено!')
       return false
     }
     return true
