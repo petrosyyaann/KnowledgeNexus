@@ -1,5 +1,5 @@
 import { Center } from 'shared/ui'
-import { LoginForm } from 'widgets/index'
+import { LoginForm } from 'widgets/LoginForm/ui'
 
 const LoginPage = () => {
   return (
