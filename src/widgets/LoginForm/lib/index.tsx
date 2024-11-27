@@ -47,7 +47,7 @@ export const useLoginForm = (): FormikProps<FormValues> => {
         localStorage.setItem('refresh', data.refresh)
         if (data) {
           getUserInfo().then(() => {
-            navigate('/home')
+            navigate('/knowledge-base')
           })
         }
       })
