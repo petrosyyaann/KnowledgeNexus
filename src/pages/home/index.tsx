@@ -12,6 +12,10 @@ import {
   Position,
   reconnectEdge,
   CoordinateExtent,
+  NodeChange,
+  // getConnectedEdges,
+  // getIncomers,
+  // getOutgoers,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Button, Flex } from 'shared/ui'
@@ -52,11 +56,13 @@ const Home = () => {
         draggable: false,
         sourcePosition: 'right' as Position,
         targetPosition: 'right' as Position,
+        style: { cursor: 'pointer' },
       }))
 
     // static Section
     const staticSection: Node = {
       id: 'static-section',
+      draggable: false,
       data: { label: 'transform' },
       position: { x: 375, y: 50 },
       sourcePosition: 'right' as Position,
@@ -75,11 +81,13 @@ const Home = () => {
         draggable: false,
         sourcePosition: 'left' as Position,
         targetPosition: 'left' as Position,
+        style: { cursor: 'pointer' },
       }))
 
     // Grouped Section (creating one group containing 3 nodes)
     const groupedSection: Node = {
       id: 'rag-section',
+      draggable: false,
       data: { label: 'RAG' },
       position: { x: 700, y: 200 },
       sourcePosition: 'left' as Position,
@@ -100,6 +108,7 @@ const Home = () => {
           node.id === 'rag-3' ? ('left' as Position) : ('right' as Position),
         targetPosition:
           node.id === 'rag-1' ? ('right' as Position) : ('left' as Position),
+        style: { cursor: 'pointer' },
       }))
 
     newNodes.push(
@@ -278,6 +287,40 @@ const Home = () => {
     []
   )
 
+  function shouldNodeBeRemoved(node: Node | undefined) {
+    if (!node) return false // Если узел не найден, предотвращаем удаление
+    if (node.id.includes('section') || node.id.includes('rag')) {
+      alert('Удаление узлов section или rag запрещено!')
+      return false
+    }
+    return true
+  }
+
+  const handleNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      const nextChanges = changes.reduce((acc, change) => {
+        if (change.type === 'remove') {
+          const node = nodes.find((n) => n.id === change.id)
+
+          // Если узел можно удалить, сохраняем изменение
+          if (shouldNodeBeRemoved(node)) {
+            return [...acc, change]
+          }
+
+          // Иначе пропускаем изменение (узел остается)
+          return acc
+        }
+
+        // Остальные изменения добавляем без проверки
+        return [...acc, change]
+      }, [] as NodeChange[])
+
+      // Применяем отфильтрованные изменения
+      onNodesChange(nextChanges)
+    },
+    [nodes, onNodesChange]
+  )
+
   const saveConnections = () => {
     const updatedBackendData = backendData.map((node) => ({
       ...node,
@@ -311,13 +354,17 @@ const Home = () => {
           nodes={nodes}
           edges={edges}
           onConnect={onConnect}
-          onNodesChange={onNodesChange}
+          onNodesChange={handleNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodeClick={(_, node) => {
+            console.log('Нода кликнута:', node)
+          }}
           nodesDraggable={false}
-          elementsSelectable={false}
+          elementsSelectable={true}
           onReconnectStart={onReconnectStart}
           onReconnect={onReconnect}
           onReconnectEnd={onReconnectEnd}
+          fitView
         >
           <Controls />
           <Background />
