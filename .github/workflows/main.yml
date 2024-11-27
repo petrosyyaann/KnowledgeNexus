@@ -30,7 +30,7 @@ jobs:
         uses: burnett01/rsync-deployments@7.0.0
         with:
           switches: -apruz --delete
-          path: ./dist/
+          path: ./dist/ chat-widget
           remote_path: ${{ vars.HACK_FOLDER }}
           remote_host: ${{ secrets.HACK_HOST }}
           remote_user: ${{ vars.HACK_USER }}
