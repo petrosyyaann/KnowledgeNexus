@@ -18,7 +18,6 @@ export function transformBackendDataToFlow(
     x: x + yIndex * 80 + 25,
     y: 300,
   })
-  console.log(defaultData)
   const addableNodes = defaultData
     .filter((node) => node.type === 'connection')
     .map((node, index) => ({
@@ -114,9 +113,6 @@ export function transformBackendDataToFlow(
   ]
 
   const edges = [...groupedInternalEdges, ...connectionEdges]
-
-  console.log(nodes)
-  console.log(edges)
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore

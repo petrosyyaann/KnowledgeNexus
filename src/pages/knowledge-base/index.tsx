@@ -63,7 +63,6 @@ const KnowledgeBase = () => {
         console.error('Элемент не найден')
         return
       }
-      console.log(item.id)
       const response = await deleteWorkflowSettings(item.id)
       console.log(response)
       setUpdate((prev) => !prev)

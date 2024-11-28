@@ -46,9 +46,10 @@ const NodeModal = ({ isOpen, onClose, node, onSave }: NodeModalProps) => {
       [key]: value,
     }))
   }
-
   const renderFields = () => {
-    switch (node.label) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    switch (node.label || node.data.label) {
       case 'pdf_parser':
         return (
           <FormField
