@@ -6,7 +6,6 @@ export const ContainerApp = ({ children }: { children: ReactNode }) => (
     w="100%"
     bg="white"
     direction="column"
-    justify="center"
     borderRadius="20px"
     mb="30px"
     mr="30px"

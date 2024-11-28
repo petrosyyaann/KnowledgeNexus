@@ -7,22 +7,28 @@ import {
   Thead,
   Tr,
   useDisclosure,
+  Text,
 } from '@chakra-ui/react'
 import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Box, Button } from 'shared/ui'
+import { Box, Button, ContainerApp, Flex } from 'shared/ui'
 import { useNavigate } from 'react-router-dom'
-import { CustomModal } from './Modal'
 import { deleteWorkflowSettings, getAllWorkflows } from 'entities/workflow/api'
+import { CustomModal } from './Modal'
 
 // Цвета состояний
 const stateColors: Record<string, string> = {
-  готово: 'green.400',
-  процесс: 'yellow.400',
-  ошибка: 'red.400',
+  Обработано: '#F4FCE3',
+  'В процессе': '#FFF9DB',
+  Ошибка: '#FFEAF7',
+}
+const borderStateColors: Record<string, string> = {
+  Обработано: '#A9E34B',
+  'В процессе': '#FFD43B',
+  Ошибка: '#F179C1',
 }
 
 interface KnowledgeBase {
@@ -42,6 +48,7 @@ interface KnowledgeBase {
 }
 
 const KnowledgeBase = () => {
+  const [chat, setChat] = useState(false)
   const [data, setData] = useState<KnowledgeBase[]>([])
   const [dataTable, setDataTable] = useState<KnowledgeBase[]>([])
   const [select, setSelect] = useState<KnowledgeBase>()
@@ -94,10 +101,10 @@ const KnowledgeBase = () => {
             name: workflow.name,
             status:
               workflow.status === 'completed'
-                ? 'готово'
+                ? 'Обработано'
                 : workflow.status === 'in_progress'
-                  ? 'процесс'
-                  : 'ошибка',
+                  ? 'В процессе'
+                  : 'Ошибка',
             themeColour: workflow.style_settings.theme_colour,
             domains: workflow.host_permissions.domens,
             ipAddresses: workflow.host_permissions.ipaddress,
@@ -120,11 +127,14 @@ const KnowledgeBase = () => {
       header: 'Состояние',
       cell: (info) => (
         <Box
+          fontWeight={600}
           bg={stateColors[info.getValue()]}
-          color="white"
+          color="#373645"
+          border={`1px solid ${borderStateColors[info.getValue()]}`}
           px={2}
           py={1}
-          borderRadius="md"
+          w="-webkit-fit-content"
+          borderRadius="20px"
           textAlign="center"
         >
           {info.getValue()}
@@ -135,10 +145,12 @@ const KnowledgeBase = () => {
       id: 'actions',
       header: 'Действия',
       cell: (info) => (
-        <Box display="flex" gap={2}>
+        <Box display="flex" gap={2} justifyContent="flex-end">
           <Button
+            color="#7984F1"
+            fontSize="16px"
+            variant="transparent"
             size="sm"
-            colorScheme="blue"
             onClick={(event) => {
               event.stopPropagation()
               setSelect(
@@ -150,8 +162,10 @@ const KnowledgeBase = () => {
             Настройка чата
           </Button>
           <Button
+            fontSize="16px"
+            color="#F179C1"
+            variant="transparent"
             size="sm"
-            colorScheme="red"
             onClick={(event) => {
               event.stopPropagation()
               setUpdate((prev) => !prev)
@@ -171,20 +185,32 @@ const KnowledgeBase = () => {
     getCoreRowModel: getCoreRowModel(),
   })
   return (
-    <Box px={5} w="100%">
-      <Button m={4} onClick={() => navigate('/scheme')}>
-        Создать базу знаний
-      </Button>
+    <ContainerApp>
+      <Flex px={5} w="100%" alignItems="center" justifyContent="space-between">
+        <Text fontSize={25} fontWeight={700}>
+          Базы знаний
+        </Text>
+        <Button background="blue.500" m={4} onClick={() => navigate('/scheme')}>
+          Создать базу знаний
+        </Button>
+      </Flex>
       <Table variant="simple">
         <Thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <Tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <Th key={header.id}>
-                  {' '}
-                  {typeof header.column.columnDef.header === 'function'
-                    ? header.column.columnDef.header(header.getContext())
-                    : header.column.columnDef.header}
+                  <Flex
+                    justifyContent={
+                      header.column.columnDef.header === 'Действия'
+                        ? 'flex-end'
+                        : ''
+                    }
+                  >
+                    {typeof header.column.columnDef.header === 'function'
+                      ? header.column.columnDef.header(header.getContext())
+                      : header.column.columnDef.header}
+                  </Flex>
                 </Th>
               ))}
             </Tr>
@@ -212,11 +238,19 @@ const KnowledgeBase = () => {
           ))}
         </Tbody>
       </Table>
-
       {select && (
-        <CustomModal isOpen={isOpen} onClose={onClose} workflowData={select} />
+        <CustomModal
+          isOpen={isOpen}
+          chat={chat}
+          setChat={setChat}
+          onClose={() => {
+            onClose()
+            setChat(false)
+          }}
+          workflowData={select}
+        />
       )}
-    </Box>
+    </ContainerApp>
   )
 }
 

@@ -40,8 +40,7 @@ export const ButtonsNavigations = ({
           />
         }
         borderRadius="20px"
-        background={check ? 'blue.500' : 'white'}
-        boxShadow={check ? 'inset 0px 0px 10px 1px rgba(97, 198, 255, 1)' : ''}
+        background={check ? '#7984F1' : 'white'}
         _hover={{
           color: 'black',
           background: 'white',

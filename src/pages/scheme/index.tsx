@@ -14,7 +14,7 @@ import {
   NodeChange,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { Button, Flex } from 'shared/ui'
+import { Button, ContainerApp, Flex } from 'shared/ui'
 import { AddNodeModal } from './modal/AddNodeModal'
 import { defaultData, BackendNode, startData } from './types'
 import NodeModal from './modal/NodeModal'
@@ -362,7 +362,7 @@ const Home = () => {
   }
 
   return (
-    <Flex direction="column" alignItems="flex-end" p="15px" gap="5px">
+    <ContainerApp>
       <Flex gap="20px">
         <Button onClick={() => openModal('connection')}>
           Добавить connection
@@ -387,7 +387,7 @@ const Home = () => {
           onSave={(data) => handleNodeSave(data)}
         />
       )}
-      <Flex w="90vw" h="80vh">
+      <Flex w="100%" h="100%">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -414,7 +414,7 @@ const Home = () => {
         </ReactFlow>
       </Flex>
       <Button onClick={saveConnections}>Сохранить и обработать</Button>
-    </Flex>
+    </ContainerApp>
   )
 }
 
