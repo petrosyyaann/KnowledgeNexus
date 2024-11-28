@@ -18,7 +18,7 @@ export function transformBackendDataToFlow(
     x: x + yIndex * 80 + 25,
     y: 300,
   })
-
+  console.log(defaultData)
   const addableNodes = defaultData
     .filter((node) => node.type === 'connection')
     .map((node, index) => ({
@@ -97,6 +97,14 @@ export function transformBackendDataToFlow(
     { id: 'e-RAG-2-RAG-3', source: 'RAG-2', target: 'RAG-3' },
   ]
 
+  const connectionEdges = defaultData.flatMap((node) =>
+    node.connections.map((targetId) => ({
+      id: `e-${node.id}-${targetId}`,
+      source: node.id,
+      target: targetId,
+    }))
+  )
+
   const nodes = [
     groupedSection,
     staticSection,
@@ -105,7 +113,12 @@ export function transformBackendDataToFlow(
     ...groupedNodes,
   ]
 
+  const edges = [...groupedInternalEdges, ...connectionEdges]
+
+  console.log(nodes)
+  console.log(edges)
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  return { nodes, edges: groupedInternalEdges }
+  return { nodes, edges }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Table,
   Tbody,
@@ -16,19 +16,7 @@ import {
 import { Box, Button } from 'shared/ui'
 import { useNavigate } from 'react-router-dom'
 import { CustomModal } from './Modal'
-
-// Тип данных для строки
-type KnowledgeBaseRow = {
-  name: string
-  state: 'готово' | 'процесс' | 'ошибка'
-}
-
-// Пример данных
-const initialData: KnowledgeBaseRow[] = [
-  { name: 'База 1', state: 'готово' },
-  { name: 'База 2', state: 'процесс' },
-  { name: 'База 3', state: 'ошибка' },
-]
+import { deleteWorkflowSettings, getAllWorkflows } from 'entities/workflow/api'
 
 // Цвета состояний
 const stateColors: Record<string, string> = {
@@ -37,26 +25,98 @@ const stateColors: Record<string, string> = {
   ошибка: 'red.400',
 }
 
+interface KnowledgeBase {
+  id: number
+  name: string
+  status: string
+  style_settings: {
+    title: string
+    theme_colour: string
+    icon_url: string
+    style_css: string
+  }
+  host_permissions: {
+    domens: string[]
+    ipaddress: string[]
+  }
+}
+
 const KnowledgeBase = () => {
-  const [data, setData] = useState(initialData)
+  const [data, setData] = useState<KnowledgeBase[]>([])
+  const [dataTable, setDataTable] = useState<KnowledgeBase[]>([])
+  const [select, setSelect] = useState<KnowledgeBase>()
+  const [update, setUpdate] = useState<boolean>()
   const navigate = useNavigate()
 
-  // Управление модалками
-  const { isOpen, onClose, onOpen } = useDisclosure()
-
   // Удаление базы знаний
-  const deleteBase = (name: string) => {
-    setData(data.filter((base) => base.name !== name))
+  const deleteBase = async (name: string) => {
+    try {
+      const item = data.find((base) => base.name === name)
+      if (!item) {
+        console.error('Элемент не найден')
+        return
+      }
+      console.log(item.id)
+      const response = await deleteWorkflowSettings(item.id)
+      console.log(response)
+      setUpdate((prev) => !prev)
+    } catch (error) {
+      console.error('Ошибка при удалении:', error)
+    }
   }
 
   // Колонки таблицы
-  const columnHelper = createColumnHelper<KnowledgeBaseRow>()
+  const columnHelper = createColumnHelper<KnowledgeBase>()
+
+  const { isOpen, onClose, onOpen } = useDisclosure()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getAllWorkflows()
+        setData(response.data)
+        const transformedData: KnowledgeBase[] = response.data.map(
+          (workflow: {
+            id: number
+            name: string
+            status: string
+            style_settings: {
+              title: string
+              theme_colour: string
+              icon_url: string
+              style_css: string
+            }
+            host_permissions: {
+              domens: string[]
+              ipaddress: string[]
+            }
+          }) => ({
+            name: workflow.name,
+            status:
+              workflow.status === 'completed'
+                ? 'готово'
+                : workflow.status === 'in_progress'
+                  ? 'процесс'
+                  : 'ошибка',
+            themeColour: workflow.style_settings.theme_colour,
+            domains: workflow.host_permissions.domens,
+            ipAddresses: workflow.host_permissions.ipaddress,
+          })
+        )
+        setDataTable(transformedData)
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error)
+      }
+    }
+    fetchData()
+  }, [update])
+
   const columns = [
     columnHelper.accessor('name', {
       header: 'Название',
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor('state', {
+    columnHelper.accessor('status', {
       header: 'Состояние',
       cell: (info) => (
         <Box
@@ -81,6 +141,9 @@ const KnowledgeBase = () => {
             colorScheme="blue"
             onClick={(event) => {
               event.stopPropagation()
+              setSelect(
+                data.filter((i) => i.name === info.row.original.name)[0]
+              )
               onOpen()
             }}
           >
@@ -89,7 +152,11 @@ const KnowledgeBase = () => {
           <Button
             size="sm"
             colorScheme="red"
-            onClick={() => deleteBase(info.row.original.name)}
+            onClick={(event) => {
+              event.stopPropagation()
+              setUpdate((prev) => !prev)
+              deleteBase(info.row.original.name)
+            }}
           >
             Удалить
           </Button>
@@ -99,19 +166,22 @@ const KnowledgeBase = () => {
   ]
 
   const table = useReactTable({
-    data,
+    data: dataTable,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
-
   return (
-    <Box p={4} w="100%">
-      <Table variant="simple" w="100%">
-        <Thead w="100%">
+    <Box px={5} w="100%">
+      <Button m={4} onClick={() => navigate('/scheme')}>
+        Создать базу знаний
+      </Button>
+      <Table variant="simple">
+        <Thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <Tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <Th key={header.id} w="100%">
+                <Th key={header.id}>
+                  {' '}
                   {typeof header.column.columnDef.header === 'function'
                     ? header.column.columnDef.header(header.getContext())
                     : header.column.columnDef.header}
@@ -120,11 +190,19 @@ const KnowledgeBase = () => {
             </Tr>
           ))}
         </Thead>
-        <Tbody w="100%">
+        <Tbody>
           {table.getRowModel().rows.map((row) => (
-            <Tr key={row.id} w="100%">
+            <Tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <Td key={cell.id} onClick={() => navigate('/scheme')} w="100%">
+                <Td
+                  key={cell.id}
+                  onClick={() => {
+                    const name = row.original.name
+                    navigate(
+                      `/scheme/${data.filter((i) => i.name === name)[0].id}`
+                    )
+                  }}
+                >
                   {typeof cell.column.columnDef.cell === 'function'
                     ? cell.column.columnDef.cell(cell.getContext())
                     : cell.getValue()}
@@ -135,7 +213,9 @@ const KnowledgeBase = () => {
         </Tbody>
       </Table>
 
-      <CustomModal isOpen={isOpen} onClose={onClose} />
+      {select && (
+        <CustomModal isOpen={isOpen} onClose={onClose} workflowData={select} />
+      )}
     </Box>
   )
 }

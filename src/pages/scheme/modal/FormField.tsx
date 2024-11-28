@@ -1,10 +1,16 @@
 import React from 'react'
-import { FormControl, FormLabel, Input, Select } from '@chakra-ui/react'
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  Select,
+  Checkbox,
+} from '@chakra-ui/react'
 
 interface FormFieldProps {
-  label: string
-  value: string | number | string[]
-  onChange: (value: string | number | string[]) => void
+  label?: string
+  value: string | number | string[] | boolean
+  onChange: (value: string | number | string[] | boolean) => void
   type?: 'text' | 'number' | 'select' | 'checkbox'
   options?: string[]
 }
@@ -17,7 +23,13 @@ const FormField = ({
   options,
 }: FormFieldProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(type === 'number' ? parseInt(e.target.value) : e.target.value)
+    if (type === 'number') {
+      onChange(parseInt(e.target.value))
+    } else if (type === 'checkbox') {
+      onChange(e.target.checked) // Для чекбокса обновляем значение как true/false
+    } else {
+      onChange(e.target.value)
+    }
   }
 
   return (
@@ -34,8 +46,18 @@ const FormField = ({
             </option>
           ))}
         </Select>
+      ) : type === 'checkbox' ? (
+        <Checkbox
+          mb={5}
+          isChecked={value as boolean} // Для чекбокса привязываем состояние к значению
+          onChange={handleChange}
+        >
+          {label}
+        </Checkbox>
       ) : (
-        <Input type={type} value={value} onChange={handleChange} />
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        <Input type={type} value={value || ''} onChange={handleChange} />
       )}
     </FormControl>
   )

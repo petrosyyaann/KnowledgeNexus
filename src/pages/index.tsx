@@ -44,7 +44,7 @@ export default function Routing() {
             }
           />
           <Route
-            path={'/scheme'}
+            path={'/scheme/:id?'}
             element={
               <ProtectedRoute>
                 <SchemePage />

@@ -19,12 +19,17 @@ import { AddNodeModal } from './modal/AddNodeModal'
 import { defaultData, BackendNode, startData } from './types'
 import NodeModal from './modal/NodeModal'
 import { transformBackendDataToFlow } from './lib/transformBackendDataToFlow'
-import { postWorkflow } from 'entities/workflow/api'
+import {
+  getWorkflowSettings,
+  postWorkflow,
+  putWorkflowSettings,
+} from 'entities/workflow/api'
 import { useToast } from '@chakra-ui/react'
 import {
   transformFlowToBackendData,
   filterNodes,
 } from './lib/transformFlowToBackendData'
+import { useParams } from 'react-router-dom'
 
 const generatePosition = (x: number, yIndex: number) => ({
   x,
@@ -43,6 +48,7 @@ const Home = () => {
   const edgeReconnectSuccessful = useRef(true)
   const [selectedNode, setSelectedNode] = useState<BackendNode | null>(null)
   const [isEditModalOpen, setEditModalOpen] = useState(false)
+  const { id } = useParams<{ id?: string }>()
 
   const openEditModal = (node: BackendNode) => {
     setSelectedNode(node)
@@ -68,10 +74,26 @@ const Home = () => {
     )
   }
   useEffect(() => {
-    const { nodes, edges } = transformBackendDataToFlow(startData)
-    setNodes(nodes)
-    setEdges([...edges])
-  }, [setNodes, setEdges])
+    const fetchData = async () => {
+      if (id) {
+        try {
+          const response = await getWorkflowSettings(Number(id))
+          const { nodes, edges } = transformBackendDataToFlow(response.data)
+          setNodes(nodes)
+          setEdges(edges)
+        } catch (err) {
+          console.warn('Ошибка загрузки данных с сервера', err)
+        }
+      } else if (startData) {
+        const { nodes, edges } = transformBackendDataToFlow(startData)
+        setNodes(nodes)
+        setEdges(edges)
+      }
+    }
+
+    fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, startData])
 
   const validateConnection = (connection: Connection): boolean => {
     const sourceNode = nodes.find((node) => node.id === connection.source)
@@ -122,7 +144,7 @@ const Home = () => {
   const onConnect = useCallback(
     (connection: Connection) => {
       if (validateConnection(connection)) {
-        handleSectionConnections(connection) // Управляем конфликтами соединений
+        handleSectionConnections(connection)
         setEdges((eds) => addEdge(connection, eds))
       } else {
         toast({
@@ -306,9 +328,13 @@ const Home = () => {
       }))
     )
 
+    const saveAction = id
+      ? putWorkflowSettings(updatedBackendData)
+      : postWorkflow(updatedBackendData)
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    postWorkflow(updatedBackendData)
+    saveAction
       .then(() => {
         toast({
           position: 'bottom-right',
@@ -320,7 +346,7 @@ const Home = () => {
           variant: 'top-accent',
         })
       })
-      .catch((error) => {
+      .catch((error: { response: { statusText: string } }) => {
         console.log(error)
         toast({
           position: 'bottom-right',
@@ -369,7 +395,9 @@ const Home = () => {
           onNodesChange={handleNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={(_, node) => {
-            const backendNode = nodes.find((n) => n.id === node.id)
+            const backendNode = nodes
+              .filter((n) => !n.id.includes('section'))
+              .find((n) => n.id === node.id)
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (backendNode) openEditModal(backendNode)

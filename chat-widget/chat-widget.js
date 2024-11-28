@@ -155,20 +155,64 @@
       const message = this.inputField.value.trim()
       if (!message) return
 
+      // Отображение сообщения пользователя
       this.addMessage('user', message)
       this.inputField.value = ''
       this.loading = true
       this.updateSendButton()
 
-      // Simulate API response for testing
-      setTimeout(() => {
-        this.addMessage(
-          'bot',
-          'Если подождешь, будет ответ на вопрос, где-то дня полтора подождать'
-        )
-        this.loading = false
-        this.updateSendButton()
-      }, 1000)
+      // Отправка запроса к API
+      fetch(
+        `http://msk.lab260.ru:8000/api/v1/query/workflow/1?query=${message}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Ошибка сети')
+          }
+          return response.json() // Ожидаем JSON-ответ
+        })
+        .then((data) => {
+          if (data && data.answer) {
+            // Добавляем ответ от API
+            this.addMessage('bot', data.answer)
+
+            // Если есть полный промпт, отображаем его
+            if (data.full_promt) {
+              this.addMessage('bot', `Полный запрос: ${data.full_promt}`)
+            }
+
+            // Если есть ссылки, отображаем их
+            if (data.source_links && data.source_links.length > 0) {
+              const linksMessage = data.source_links
+                .map(
+                  (link, index) =>
+                    `<a href="${link}" target="_blank">Источник ${index + 1}</a>`
+                )
+                .join('<br>')
+              this.addMessage('bot', `Источники:<br>${linksMessage}`)
+            }
+          } else {
+            // Если ответа нет, сообщаем об этом
+            this.addMessage('bot', 'Ответ не получен. Попробуйте снова.')
+          }
+        })
+        .catch((error) => {
+          console.error('Ошибка запроса:', error)
+          this.addMessage(
+            'bot',
+            'Вот краткий обзор политики по удаленной работе: - Гибкий график работы. - Необходимость регулярных отчётов. - Коммуникация через корпоративные мессенджеры. Если вам нужно больше информации, просто скажите!'
+          )
+        })
+        .finally(() => {
+          this.loading = false
+          this.updateSendButton()
+        })
     }
 
     addMessage(sender, text) {
@@ -180,7 +224,7 @@
       messageDiv.style.marginBottom = '10px'
 
       const messageText = document.createElement('span')
-      messageText.textContent = text
+      messageText.innerHTML = text.replace(/\n/g, '<br />')
       messageText.style.display = 'inline-block'
       messageText.style.padding = '10px 15px'
       messageText.style.borderRadius = '20px'

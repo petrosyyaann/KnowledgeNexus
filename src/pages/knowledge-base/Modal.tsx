@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   FormControl,
   FormLabel,
@@ -13,24 +13,55 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { Button, Input, Textarea, Text } from 'shared/ui'
+import { putWorkflowAgentSettings } from 'entities/workflow/api'
 
 export const CustomModal = ({
   isOpen,
   onClose,
+  workflowData,
 }: {
   isOpen: boolean
   onClose: () => void
+  workflowData: {
+    id: number
+    name: string
+    status: string
+    style_settings: {
+      title: string
+      theme_colour: string
+      icon_url: string
+      style_css: string
+    }
+    host_permissions: {
+      domens: string[]
+      ipaddress: string[]
+    }
+  } | null
 }) => {
+  console.log(workflowData)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const toast = useToast()
 
-  // Состояния для полей ввода
+  // Поля ввода
   const [title, setTitle] = useState('Мой чат')
   const [color, setColor] = useState('#007bff')
   const [iconUrl, setIconUrl] = useState('')
   const [customCss, setCustomCss] = useState('')
-  const [domains, setDomains] = useState('') // Ограничение по доменам
-  const [ips, setIps] = useState('') // Ограничение по IP
+  const [domains, setDomains] = useState('')
+  const [ips, setIps] = useState('')
+
+  // Инициализация значений из пропсов
+  useEffect(() => {
+    if (workflowData) {
+      const { style_settings, host_permissions } = workflowData
+      setTitle(style_settings.title || 'Мой чат')
+      setColor(style_settings.theme_colour || '#007bff')
+      setIconUrl(style_settings.icon_url || '')
+      setCustomCss(style_settings.style_css || '')
+      setDomains(host_permissions.domens.join(', '))
+      setIps(host_permissions.ipaddress.join(', '))
+    }
+  }, [workflowData])
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -99,6 +130,53 @@ export const CustomModal = ({
       return
     }
     navigator.clipboard.writeText(generateCode())
+  }
+
+  const handleSave = async () => {
+    if (!validate()) {
+        position: 'bottom-right',
+        title: 'Ошибка',
+        description: 'Пожалуйста, исправьте ошибки перед сохранением',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+      })
+      return
+    }
+
+    try {
+      await putWorkflowAgentSettings(
+        workflowData?.id || 1,
+        title,
+        color,
+        iconUrl,
+        customCss,
+        domains.split(',').map((d) => d.trim()),
+        ips.split(',').map((ip) => ip.trim())
+      )
+
+      toast({
+        position: 'bottom-right',
+        title: 'Успех',
+        description: 'Настройки успешно сохранены',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        variant: 'top-accent',
+      })
+      onClose()
+    } catch (error) {
+      console.error('Ошибка при сохранении настроек:', error)
+      toast({
+        position: 'bottom-right',
+        title: 'Ошибка',
+        description: 'Не удалось сохранить настройки',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+        variant: 'top-accent',
+      })
+    }
   }
 
   return (
@@ -206,6 +284,9 @@ export const CustomModal = ({
           </Box>
         </ModalBody>
         <ModalFooter>
+          <Button mr={4} onClick={handleSave}>
+            Сохранить
+          </Button>
           <Button mr={4} onClick={handleCopy}>
             Скопировать код
           </Button>
