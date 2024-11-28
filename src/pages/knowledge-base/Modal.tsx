@@ -99,7 +99,7 @@ export const CustomModal = ({
   }
 
   const generateCode = () => {
-    return `<script src="http://localhost:8000/chat-widget.js"></script>
+    return `<script src="http://45.9.73.91/chat-widget.js"></script>
 <script>
   window.createChatWidget({
     apiUrl: 'http://msk.lab260.ru:8000/api/v1/query/workflow/${workflowData ? workflowData.id : 1}',

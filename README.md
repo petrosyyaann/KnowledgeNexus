@@ -1,6 +1,36 @@
-## Torni
+### Установка и запуск
 
-Torni разработан на основе React с использованием TypeScript и архитектуры Feature-Sliced Design (FSD), что обеспечивает масштабируемость и поддерживаемость кода.
+#### Системные требования
+
+- **Node.js** версии 14.x или выше
+- **Yarn** версии 1.x или 2.x
+
+#### Шаги для установки:
+
+Установите зависимости с помощью Yarn:
+
+```bash
+yarn install
+```
+
+Сборка проекта для продакшена:
+
+```bash
+yarn build
+```
+
+Для запуска собранного приложения используйте команду:
+
+```bash
+yarn preview
+```
+
+Для поднятия чата необходимо
+
+```bash
+cd chat-widget
+python3 -m http.server 9012
+```
 
 ---
 
@@ -15,88 +45,6 @@ Torni разработан на основе React с использование
 - **Yarn** — пакетный менеджер
 - **Chakra UI** — библиотека компонентов для создания UI
 - **FSD (Feature-Sliced Design)** — архитектурный подход для организации кода
-
----
-
-### Установка и запуск
-
-#### Системные требования
-
-- **Node.js** версии 14.x или выше
-- **Yarn** версии 1.x или 2.x
-
-#### Шаги для установки:
-
-1. Склонируйте репозиторий:
-
-   ```bash
-   git clone https://github.com/your-username/torni.git
-   cd torni
-   ```
-
-2. Установите зависимости с помощью Yarn:
-
-   ```bash
-   yarn install
-   ```
-
-3. Запуск приложения в режиме разработки:
-
-   ```bash
-   yarn dev
-   ```
-
-   После этого приложение будет доступно по адресу: [http://localhost:5173](http://localhost:5173)
-
-4. Сборка проекта для продакшена:
-
-   ```bash
-   yarn build
-   ```
-
-5. Для запуска собранного приложения используйте команду:
-   ```bash
-   yarn preview
-   ```
-
----
-
-### Конфигурация Vite
-
-Ваш проект использует **Vite** для сборки с конфигурацией, настроенной на использование React, TypeScript и поддержки путей через `tsconfig`:
-
-```js
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tsconfigPaths from 'vite-tsconfig-paths'
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
-  server: {
-    port: 5173,
-    open: 'http://localhost:5173/',
-    proxy: {
-      '/api/v1': {
-        //dev
-        target: 'http://spb.pndsdn.tech:8080/api/v1',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/v1/, ''),
-      },
-    },
-  },
-  resolve: {
-    alias: {
-      app: '/src/app',
-      pages: '/src/pages',
-      widgets: '/src/widgets',
-      features: '/src/features',
-      entities: '/src/entities',
-      shared: '/src/shared',
-    },
-  },
-})
-```
 
 ---
 
