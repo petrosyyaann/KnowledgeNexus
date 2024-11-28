@@ -35,7 +35,7 @@ const ChatWidget = ({
 }) => {
   useEffect(() => {
     const script = document.createElement('script')
-    script.src = 'http://45.9.73.91/chat-widget.js'
+    script.src = 'https://msk.lab260.ru/chat-widget.js'
     script.async = true
 
     // Функция для удаления виджета
@@ -47,7 +47,7 @@ const ChatWidget = ({
 
       // Удаляем скрипт
       const existingScript = document.querySelector(
-        `script[src="http://45.9.73.91/chat-widget.js"]`
+        `script[src="https://msk.lab260.ru/chat-widget.js"]`
       )
       if (existingScript) {
         existingScript.remove()
