@@ -162,7 +162,7 @@
       this.updateSendButton()
 
       // Отправка запроса к API
-      fetch(`${apiUrl}?query=${message}`, {
+      fetch(`${this.apiUrl}?query=${message}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
