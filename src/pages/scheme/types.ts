@@ -198,7 +198,7 @@ export const defaultData: BackendNode[] = [
     type: 'rag',
     label: 'chunker',
     connections: [],
-    data: { chunk_size: 0, chunk_overlap: 0 },
+    data: { chunk_size: 500, chunk_overlap: 50 },
   },
   {
     id: 'RAG-2',
@@ -245,7 +245,7 @@ export const startData: BackendNode[] = [
     type: 'rag',
     label: 'chunker',
     connections: [],
-    data: { chunk_size: 0, chunk_overlap: 0 },
+    data: { chunk_size: 500, chunk_overlap: 50 },
   },
   {
     id: 'RAG-2',

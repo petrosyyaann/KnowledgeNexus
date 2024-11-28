@@ -287,7 +287,7 @@ const NodeModal = ({ isOpen, onClose, node, onSave }: NodeModalProps) => {
               onChange={(value) =>
                 handleChange(
                   'chunk_size' as keyof typeof data,
-                  typeof value !== 'object' ? parseInt(String(value), 10) : 0
+                  typeof value !== 'object' ? parseInt(String(value), 10) : 500
                 )
               }
             />
@@ -297,7 +297,7 @@ const NodeModal = ({ isOpen, onClose, node, onSave }: NodeModalProps) => {
               onChange={(value) =>
                 handleChange(
                   'chunk_overlap' as keyof typeof data,
-                  typeof value !== 'object' ? parseInt(String(value), 10) : 0
+                  typeof value !== 'object' ? parseInt(String(value), 10) : 50
                 )
               }
             />
