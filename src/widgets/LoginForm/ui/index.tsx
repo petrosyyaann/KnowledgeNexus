@@ -71,7 +71,7 @@ export const LoginForm = () => {
             color={'black.100'}
             cursor={'pointer'}
             _hover={{ color: 'blue.300' }}
-            onClick={() => navigate('/knowledge-base')}
+            onClick={() => navigate('/registration')}
           >
             Регистрация
           </chakra.span>

@@ -224,6 +224,7 @@ const Home = () => {
         sourcePosition: 'left' as Position,
         targetPosition: 'left' as Position,
       }
+      console.log(newNode)
       setNodes((nds) => [...nds, newNode])
 
       // Adjust the size of the static section dynamically
