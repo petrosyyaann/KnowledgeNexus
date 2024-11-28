@@ -35,7 +35,7 @@ const ChatWidget = ({
 }) => {
   useEffect(() => {
     const script = document.createElement('script')
-    script.src = 'https://msk.lab260.ru:208080/chat-widget.js'
+    script.src = 'https://msk.lab260.ru/chat-widget.js'
     script.async = true
 
     // Функция для удаления виджета
@@ -47,7 +47,7 @@ const ChatWidget = ({
 
       // Удаляем скрипт
       const existingScript = document.querySelector(
-        `script[src="https://msk.lab260.ru:208080/chat-widget.js"]`
+        `script[src="https://msk.lab260.ru/chat-widget.js"]`
       )
       if (existingScript) {
         existingScript.remove()
@@ -63,7 +63,7 @@ const ChatWidget = ({
         script.onload = () => {
           if (window.createChatWidget) {
             window.createChatWidget({
-              apiUrl: `http://msk.lab260.ru:8000/api/v1/query/workflow/${id || 1}`,
+              apiUrl: `http://msk.lab260.ru/api/v1/query/workflow/${id || 1}`,
               title,
               theme: { color },
               iconUrl,

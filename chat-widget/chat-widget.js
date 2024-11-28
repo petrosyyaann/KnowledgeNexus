@@ -162,15 +162,12 @@
       this.updateSendButton()
 
       // Отправка запроса к API
-      fetch(
-        `http://msk.lab260.ru:8000/api/v1/query/workflow/1?query=${message}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
+      fetch(`${apiUrl}?query=${message}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
         .then((response) => {
           if (!response.ok) {
             throw new Error('Ошибка сети')
